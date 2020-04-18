@@ -1,0 +1,11 @@
+{
+  "name": "networkfilesync",
+  "version": "1.0.0",
+  "description": "",
+  "main": "filesync.js",
+  "scripts": {
+    "test": "node filesync.js"
+  },
+  "author": "ardittristan",
+  "license": "ISC"
+}
