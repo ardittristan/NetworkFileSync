@@ -4,8 +4,16 @@
   "description": "",
   "main": "filesync.js",
   "scripts": {
-    "test": "node filesync.js"
+    "test": "node filesync.js",
+    "start": "node filesync.js",
+    "auth": "node auth.js"
   },
   "author": "ardittristan",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "google-tokens": "0.0.3",
+    "googleapis": "^49.0.0",
+    "moment": "^2.24.0"
+  }
 }
