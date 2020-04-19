@@ -3,12 +3,14 @@
 // OAUTH_CLIENT_SECRET=
 // IMPORT_FOLDER=
 // EXPORT_FOLDER=
+// ERROR_WEBHOOK=
 
 require('dotenv').config();
 
 const { existsSync } = require('fs');
 const moment = require('moment');
 const { google } = require('googleapis');
+const WebHooks = require('node-webhooks');
 
 
 //* check if there's already a refresh token made
@@ -32,13 +34,17 @@ const drive = google.drive({
     auth: oauth2Client
 });
 
+//* init webhooks
+var webHooks = new WebHooks({ db: { "driveError": [process.env.ERROR_WEBHOOK] } });
+
 //* function for moving and renaming files from one to another folder
 async function SyncFiles() {
     // list files in folder
     drive.files.list({
         q: `'${process.env.IMPORT_FOLDER}' in parents and trashed = false and mimeType = 'text/csv'`, //filter for folder and csv
         fields: 'files(id)'
-    }, async function (_, res) {
+    }, async function (err, res) {
+        if (err) { console.error('The API returned an error: ' + err); webHooks.trigger("driveError"); return; }
         if (res.data.files.length != 0) {
             // for each file in folder
             res.data.files.forEach(
@@ -56,11 +62,11 @@ async function SyncFiles() {
                             body: fileOut.data
                         }
                     });
-                    console.log(`Uploaded: NetWorx Report ${moment().format('MMMM DD, YYYY [at] hhmmA')}.csv`)
-                    
+                    console.log(`Uploaded: NetWorx Report ${moment().format('MMMM DD, YYYY [at] hhmmA')}.csv`);
+
                     // delete file in import directory
-                    drive.files.delete({fileId: fileIn.id})
-                    console.log(`Deleted: ${fileIn.id}`)
+                    drive.files.delete({ fileId: fileIn.id });
+                    console.log(`Deleted: ${fileIn.id}`);
                 }
             );
         }
@@ -69,4 +75,4 @@ async function SyncFiles() {
 
 //* interval for function
 SyncFiles();
-setInterval(SyncFiles, 600000);
+setInterval(SyncFiles, 900000);
